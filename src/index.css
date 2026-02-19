@@ -1,5 +1,67 @@
-/* Fullscreen */
 html, body, #root {
   height: 100%;
   margin: 0;
+}
+
+.studio-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: #111;
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui;
+}
+
+/* viewport fills the whole thing */
+.viewport {
+  position: absolute;
+  inset: 0;
+}
+
+/* right settings panel */
+.settings-panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 280px;
+  border-radius: 14px;
+  background: rgba(40, 45, 52, 0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 14px;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.panel-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.panel-sub {
+  opacity: 0.7;
+  font-size: 12px;
+}
+
+/* bottom toolbar */
+.toolbar {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(40, 45, 52, 0.92);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.toolbar button {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
 }
