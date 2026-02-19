@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useStudioStore } from "../store/useStudioStore";
+import { ObjectPanel } from "./ObjectPanel";
 
 const WALL_SWATCHES = [
   "#f3f0e9",
@@ -43,7 +44,6 @@ export function SettingsPanel() {
     <div className="settings-panel">
       <div className="settings-header">
         <div className="panel-title">Design Settings</div>
-        {/* optional – if you want close later */}
         {/* <button className="panel-close" aria-label="Close">×</button> */}
       </div>
 
@@ -107,6 +107,8 @@ export function SettingsPanel() {
           value={lightTemp}
           onChange={(e) => setLightTemp(parseFloat(e.target.value))}
         />
+
+        <ObjectPanel />
 
         <div className="kelvin-row">
           <span className="kelvin-dot" style={{ background: lightColor }} />
