@@ -4,7 +4,7 @@ export type ToolMode = "select" | "move" | "rotate";
 
 export type StudioObject = {
   id: string;
-  type: "box";
+  type: "box" | "chair" | "table" | "lamp" | "rug";
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];
@@ -31,21 +31,55 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   toolMode: "select",
   setToolMode: (toolMode) => set({ toolMode }),
 
-  addObject: () =>
-    set((state) => ({
-      objects: [
-        ...state.objects,
-        {
-          id: crypto.randomUUID(),
-          type: "box",
-          position: [0, 0.5, 0],
-          rotation: [0, 0, 0],
-          scale: [1, 1, 1],
+  addObject: (type: StudioObject["type"] = "box") =>
+    set((state) => {
+      const id = crypto.randomUUID();
+
+      const defaults = {
+        box: {
           size: [1, 1, 1],
+          position: [0, 0.5, 0],
           color: "#c2a676",
         },
-      ],
-    })),
+        chair: {
+          size: [0.6, 0.9, 0.6],
+          position: [0, 0.45, 0],
+          color: "#c2a676",
+        },
+        table: {
+          size: [1.4, 0.75, 0.8],
+          position: [0, 0.375, 0],
+          color: "#b28b5c",
+        },
+        lamp: {
+          size: [0.3, 1.6, 0.3],
+          position: [0, 0.8, 0],
+          color: "#f4e7c5",
+        },
+        rug: {
+          size: [2.5, 0.05, 1.5],
+          position: [0, 0.025, 0],
+          color: "#cbb7f7",
+        },
+      }[type];
+
+      return {
+        objects: [
+          ...state.objects,
+          {
+            id,
+            type,
+            position: defaults.position as [number, number, number],
+            rotation: [0, 0, 0],
+            scale: [1, 1, 1],
+            size: defaults.size as [number, number, number],
+            color: defaults.color,
+          },
+        ],
+        selectedId: id,
+        toolMode: "move",
+      };
+    }),
 
   selectObject: (id) => set({ selectedId: id }),
 

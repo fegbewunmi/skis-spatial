@@ -10,7 +10,7 @@ const WALL_SWATCHES = [
   "#d9c2f5",
   "#c2f5e6",
   "#f5c2d9",
-];
+] as const;
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -41,18 +41,24 @@ export function SettingsPanel() {
 
   return (
     <div className="settings-panel">
-      <div className="panel-title">Design Settings</div>
+      <div className="settings-header">
+        <div className="panel-title">Design Settings</div>
+        {/* optional – if you want close later */}
+        {/* <button className="panel-close" aria-label="Close">×</button> */}
+      </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+      <div className="mode-tabs">
         <button
           className={mode === "day" ? "tab active" : "tab"}
           onClick={() => setMode("day")}
+          type="button"
         >
           Day Mode
         </button>
         <button
           className={mode === "night" ? "tab active" : "tab"}
           onClick={() => setMode("night")}
+          type="button"
         >
           Night Mode
         </button>
@@ -61,24 +67,26 @@ export function SettingsPanel() {
       <div className="section">
         <div className="label">Wall Color</div>
         <div className="swatches">
-          {WALL_SWATCHES.map((c) => (
-            <button
-              key={c}
-              className="swatch"
-              style={{
-                background: c,
-                outline: wallColor === c ? "2px solid #fff" : "none",
-              }}
-              onClick={() => setWallColor(c)}
-              aria-label={`Wall color ${c}`}
-            />
-          ))}
+          {WALL_SWATCHES.map((c) => {
+            const active = wallColor === c;
+            return (
+              <button
+                key={c}
+                className={active ? "swatch active" : "swatch"}
+                style={{ background: c }}
+                onClick={() => setWallColor(c)}
+                aria-label={`Wall color ${c}`}
+                type="button"
+              />
+            );
+          })}
         </div>
       </div>
 
       <div className="section">
         <div className="label">Light Intensity</div>
         <input
+          className="slider"
           type="range"
           min={0}
           max={3}
@@ -91,6 +99,7 @@ export function SettingsPanel() {
       <div className="section">
         <div className="label">Light Temperature</div>
         <input
+          className="slider"
           type="range"
           min={2700}
           max={6500}
@@ -98,26 +107,10 @@ export function SettingsPanel() {
           value={lightTemp}
           onChange={(e) => setLightTemp(parseFloat(e.target.value))}
         />
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 8,
-          }}
-        >
-          <div
-            style={{
-              width: 14,
-              height: 14,
-              borderRadius: 999,
-              background: lightColor,
-              border: "1px solid rgba(255,255,255,0.25)",
-            }}
-          />
-          <div style={{ fontSize: 12, opacity: 0.75 }}>
-            {Math.round(lightTemp)}K
-          </div>
+
+        <div className="kelvin-row">
+          <span className="kelvin-dot" style={{ background: lightColor }} />
+          <span className="kelvin-text">{Math.round(lightTemp)}K</span>
         </div>
       </div>
     </div>

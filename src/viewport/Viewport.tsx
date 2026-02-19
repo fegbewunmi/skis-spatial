@@ -1,13 +1,11 @@
 import { Canvas } from "@react-three/fiber";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
 import { useStudioStore } from "../store/useStudioStore";
 import { useEditorStore } from "../store/editorStore";
 import { kelvinToCSS } from "../ui/SettingsPanel";
 import { OrbitControls, TransformControls } from "@react-three/drei";
-import type {
-  OrbitControls as OrbitControlsImpl,
-  TransformControls as TransformControlsImpl,
-} from "three-stdlib";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
 function Room({ wallColor }: { wallColor: string }) {
   return (
@@ -21,7 +19,7 @@ function Room({ wallColor }: { wallColor: string }) {
       {/* back wall */}
       <mesh position={[0, 2.5, -5]} receiveShadow>
         <planeGeometry args={[10, 5]} />
-        <meshStandardMaterial color={wallColor} side={2} />
+        <meshStandardMaterial color={wallColor} side={THREE.DoubleSide} />
       </mesh>
 
       {/* right wall */}
@@ -31,64 +29,46 @@ function Room({ wallColor }: { wallColor: string }) {
         receiveShadow
       >
         <planeGeometry args={[10, 5]} />
-        <meshStandardMaterial color={wallColor} side={2} />
+        <meshStandardMaterial color={wallColor} side={THREE.DoubleSide} />
       </mesh>
     </group>
   );
 }
 
 export function Viewport() {
-  // Studio settings (already in your project)
+  // Studio settings
   const mode = useStudioStore((s) => s.mode);
   const wallColor = useStudioStore((s) => s.wallColor);
   const lightIntensity = useStudioStore((s) => s.lightIntensity);
   const lightTemp = useStudioStore((s) => s.lightTemp);
-
   const lightColor = useMemo(() => kelvinToCSS(lightTemp), [lightTemp]);
 
-  // Editor objects (new)
+  // Editor state
   const objects = useEditorStore((s) => s.objects);
   const selectedId = useEditorStore((s) => s.selectedId);
   const selectObject = useEditorStore((s) => s.selectObject);
-
   const toolMode = useEditorStore((s) => s.toolMode);
   const updateObject = useEditorStore((s) => s.updateObject);
+
+  // controls refs
   const orbitRef = useRef<OrbitControlsImpl>(null);
-  const transformRef = useRef<TransformControlsImpl>(null);
 
-  useEffect(() => {
-    const tc = transformRef.current;
-    if (!tc) return;
+  // keep refs to every object group
+  const objectRefs = useRef<Record<string, THREE.Group | null>>({});
 
-    const onDraggingChanged = (e: any) => {
-      const dragging = !!e.value;
-
-      // disable orbit while dragging
-      if (orbitRef.current) orbitRef.current.enabled = !dragging;
-
-      // when drag ends, commit to store
-      if (!dragging && selectedId) {
-        const obj3d = tc.object;
-        if (!obj3d) return;
-
-        updateObject(selectedId, {
-          position: [obj3d.position.x, obj3d.position.y, obj3d.position.z],
-          rotation: [obj3d.rotation.x, obj3d.rotation.y, obj3d.rotation.z],
-          scale: [obj3d.scale.x, obj3d.scale.y, obj3d.scale.z],
-        });
-      }
-    };
-
-    tc.addEventListener("dragging-changed", onDraggingChanged);
-    return () => tc.removeEventListener("dragging-changed", onDraggingChanged);
-  }, [selectedId, updateObject]);
+  const selectedObj3D = selectedId ? objectRefs.current[selectedId] : null;
+  const tcEnabled = !!selectedObj3D && toolMode !== "select";
+  const tcMode = toolMode === "move" ? "translate" : "rotate";
 
   return (
     <div className="viewport">
       <Canvas
         shadows
         camera={{ position: [6, 5, 6], fov: 50 }}
-        // onPointerMissed={() => selectObject(null)} // click empty = deselect
+        onPointerMissed={() => {
+          // click empty space = deselect
+          selectObject(null);
+        }}
       >
         <color
           attach="background"
@@ -105,13 +85,16 @@ export function Viewport() {
 
         <Room wallColor={wallColor} />
 
-        {/* Render objects */}
+        {/* ✅ render objects as stable groups (no TransformControls wrapping) */}
         {objects.map((obj) => {
           const isSelected = selectedId === obj.id;
 
-          // wrapper group holds transforms (THIS is what we transform)
-          const groupNode = (
+          return (
             <group
+              key={obj.id}
+              ref={(node) => {
+                objectRefs.current[obj.id] = node;
+              }}
               position={obj.position}
               rotation={obj.rotation}
               scale={obj.scale}
@@ -120,7 +103,6 @@ export function Viewport() {
                 selectObject(obj.id);
               }}
             >
-              {/* mesh at origin inside group */}
               <mesh castShadow>
                 <boxGeometry args={obj.size} />
                 <meshStandardMaterial
@@ -131,20 +113,32 @@ export function Viewport() {
               </mesh>
             </group>
           );
-
-          // no gizmo if not selected or in select mode
-          if (!isSelected || toolMode === "select") {
-            return <group key={obj.id}>{groupNode}</group>;
-          }
-
-          const tcMode = toolMode === "move" ? "translate" : "rotate";
-
-          return (
-            <TransformControls ref={transformRef} key={obj.id} mode={tcMode}>
-              {groupNode}
-            </TransformControls>
-          );
         })}
+
+        {/* ✅ ONE TransformControls that attaches to selected object */}
+        <TransformControls
+          enabled={tcEnabled}
+          mode={tcMode}
+          // this is the key part: attach to the real selected THREE.Group
+          object={selectedObj3D as unknown as THREE.Object3D}
+          onMouseDown={() => {
+            if (orbitRef.current) orbitRef.current.enabled = false;
+          }}
+          onMouseUp={() => {
+            if (orbitRef.current) orbitRef.current.enabled = true;
+          }}
+          onObjectChange={() => {
+            if (!selectedId) return;
+            const g = objectRefs.current[selectedId];
+            if (!g) return;
+
+            updateObject(selectedId, {
+              position: [g.position.x, g.position.y, g.position.z],
+              rotation: [g.rotation.x, g.rotation.y, g.rotation.z],
+              scale: [g.scale.x, g.scale.y, g.scale.z],
+            });
+          }}
+        />
 
         <OrbitControls
           ref={orbitRef}
