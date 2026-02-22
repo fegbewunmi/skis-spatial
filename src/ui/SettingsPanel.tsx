@@ -44,9 +44,11 @@ export function SettingsPanel() {
     <div className="settings-panel">
       <div className="settings-header">
         <div className="panel-title">Design Settings</div>
-        {/* <button className="panel-close" aria-label="Close">×</button> */}
+        {/* optional close button for later */}
+        {/* <button className="icon-btn" aria-label="Close">×</button> */}
       </div>
 
+      {/* Day/Night segmented */}
       <div className="mode-tabs">
         <button
           className={mode === "day" ? "tab active" : "tab"}
@@ -64,6 +66,7 @@ export function SettingsPanel() {
         </button>
       </div>
 
+      {/* Wall swatches */}
       <div className="section">
         <div className="label">Wall Color</div>
         <div className="swatches">
@@ -83,6 +86,7 @@ export function SettingsPanel() {
         </div>
       </div>
 
+      {/* Light intensity */}
       <div className="section">
         <div className="label">Light Intensity</div>
         <input
@@ -96,6 +100,7 @@ export function SettingsPanel() {
         />
       </div>
 
+      {/* Light temperature */}
       <div className="section">
         <div className="label">Light Temperature</div>
         <input
@@ -108,13 +113,14 @@ export function SettingsPanel() {
           onChange={(e) => setLightTemp(parseFloat(e.target.value))}
         />
 
-        <ObjectPanel />
-
         <div className="kelvin-row">
           <span className="kelvin-dot" style={{ background: lightColor }} />
           <span className="kelvin-text">{Math.round(lightTemp)}K</span>
         </div>
       </div>
+
+      {/* Selected object section */}
+      <ObjectPanel />
     </div>
   );
 }
