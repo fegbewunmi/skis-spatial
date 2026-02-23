@@ -16,7 +16,7 @@ type EditorState = {
   objects: StudioObject[];
   selectedId: string | null;
 
-  addObject: () => void;
+  addObject: (type?: StudioObject["type"]) => void;
   selectObject: (id: string | null) => void;
   updateObject: (id: string, updates: Partial<StudioObject>) => void;
   toolMode: ToolMode;

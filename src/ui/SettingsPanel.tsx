@@ -42,13 +42,11 @@ export function kelvinToCSS(k: number) {
 export function SettingsPanel() {
   const mode = useStudioStore((s) => s.mode);
   const wallColor = useStudioStore((s) => s.wallColor);
-  const floorColor = useStudioStore((s) => s.floorColor);
   const lightIntensity = useStudioStore((s) => s.lightIntensity);
   const lightTemp = useStudioStore((s) => s.lightTemp);
 
   const setMode = useStudioStore((s) => s.setMode);
   const setWallColor = useStudioStore((s) => s.setWallColor);
-  const setFloorColor = useStudioStore((s) => s.setFloorColor);
   const setLightIntensity = useStudioStore((s) => s.setLightIntensity);
   const setLightTemp = useStudioStore((s) => s.setLightTemp);
 

@@ -13,18 +13,12 @@ import { useEditorStore } from "../store/editorStore";
 import { kelvinToCSS } from "../ui/SettingsPanel";
 import { Model } from "./Model";
 
-function Room({
-  wallColor,
-  floorColor,
-}: {
-  wallColor: string;
-  floorColor: string;
-}) {
+function Room({ wallColor }: { wallColor: string }) {
   const W = 8;
   const D = 10;
   const H = 4;
 
-  const floorPreset = useStudioStore((s) => s.floorPreset); // "brown" | "grey"
+  const floorPreset = useStudioStore((s) => s.floorPreset);
 
   // Memoize URLs so useTexture doesn't get a new object every render
   const urls = useMemo(() => {
@@ -43,7 +37,6 @@ function Room({
 
   const { map, normalMap, roughnessMap } = useTexture(urls);
 
-  // Make the texture read like planks: repeat + wrap + colorSpace
   useMemo(() => {
     const texs = [map, normalMap, roughnessMap].filter(
       Boolean,
@@ -52,7 +45,6 @@ function Room({
       t.wrapS = THREE.RepeatWrapping;
       t.wrapT = THREE.RepeatWrapping;
 
-      // tweak these for your room scale
       t.repeat.set(2.2, 2.2);
 
       t.anisotropy = 8;
@@ -73,8 +65,6 @@ function Room({
           normalMap={normalMap}
           roughnessMap={roughnessMap}
           roughness={1}
-          // tint the texture so you can push it warmer/cooler from settings
-          color={floorColor}
         />
       </mesh>
 
@@ -102,7 +92,6 @@ function Room({
         />
       </mesh>
 
-      {/* baseboard-ish line */}
       <mesh position={[0, 0.02, -D / 2 + 0.01]}>
         <planeGeometry args={[W, 0.06]} />
         <meshStandardMaterial color="#000000" transparent opacity={0.15} />
@@ -171,7 +160,7 @@ export function Viewport() {
             groundColor="#1b1b1b"
           />
 
-          <Room wallColor={wallColor} floorColor={floorColor} />
+          <Room wallColor={wallColor} />
 
           {objects.map((obj) => (
             <group
