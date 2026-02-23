@@ -13,18 +13,6 @@ const WALL_SWATCHES = [
   "#c9b49c", // warm clay
 ];
 
-const FLOOR_SWATCHES = [
-  "#d9cbb6", // light oak
-  "#c8b79f", // natural oak
-  "#b49a7a", // warm honey
-  "#9c856c", // walnut light
-
-  "#7c6a58", // walnut dark
-  "#6b5a4b", // espresso
-  "#bfc2c7", // light concrete
-  "#9ea3a8", // darker concrete
-];
-
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }

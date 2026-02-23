@@ -104,7 +104,6 @@ export function Viewport() {
   // Studio settings
   const mode = useStudioStore((s) => s.mode);
   const wallColor = useStudioStore((s) => s.wallColor);
-  const floorColor = useStudioStore((s) => s.floorColor);
   const lightIntensity = useStudioStore((s) => s.lightIntensity);
   const lightTemp = useStudioStore((s) => s.lightTemp);
   const lightColor = useMemo(() => kelvinToCSS(lightTemp), [lightTemp]);
