@@ -1,91 +1,51 @@
-# Spatial Room Editor (React Three Fiber)
+# Skis Spatial — 3D Room Editor
 
-Interactive web-based 3D room editor built with React Three Fiber, TypeScript, and Zustand.  
-Supports real-time object placement, selection, transformation, and configurable lighting and materials.
+Live Demo: https://skis-spatial.vercel.app
 
-Live Demo: https://skis-spatial.vercel.app/
-
----
+An interactive browser-based 3D spatial editor built with React Three Fiber.  
+Users can configure room environment settings and manipulate objects in real time.
 
 ## Features
 
-• Interactive 3D room environment  
-• Add, select, and manipulate objects (move, rotate, scale)  
-• TransformControls integration with stable object state synchronization  
-• Camera orbit system with constrained navigation  
-• Physically-based lighting with adjustable intensity and temperature  
-• Real-time texture switching (wood floor presets)  
-• GLTF model loading pipeline  
-• Modular architecture with Zustand global state management  
-• Responsive UI with real-time scene updates  
-
----
+- Interactive 3D camera controls
+- Object placement and manipulation
+- Move and rotate objects with transform controls
+- Real-time lighting adjustment
+- Floor material presets (wood textures)
+- Dynamic wall color configuration
+- State management using Zustand
+- Production deployment with Vercel
 
 ## Tech Stack
 
-Frontend  
-• React  
-• TypeScript  
-• React Three Fiber  
-• Three.js  
-• Zustand  
+- React
+- TypeScript
+- React Three Fiber
+- Three.js
+- Zustand
+- Vite
+- Vercel
 
-3D / Graphics  
-• GLTF models  
-• PBR materials  
-• TransformControls  
-• OrbitControls  
+## Architecture
 
-Tooling  
-• Vite  
-• ES Modules  
+State management is handled using Zustand stores:
 
----
+- StudioStore — environment settings
+- EditorStore — object state and manipulation
 
-## Architecture Overview
+3D rendering is managed via React Three Fiber, with TransformControls and OrbitControls enabling direct interaction.
 
-The editor separates responsibilities into independent layers:
+## Run locally
 
-• Scene Layer  
-Handles rendering, camera, lighting, and environment
+```bash
+npm install
+npm run dev
+```
 
-• Object Layer  
-Each object is represented as a stable THREE.Group  
-TransformControls attaches dynamically to selected object
+## Deployment
 
-• State Layer (Zustand)  
-Manages
-
-- scene settings
-- lighting
-- object transforms
-- selection state
-
-• UI Layer  
-Settings panel and editor controls update state, which synchronizes with the 3D scene
+Deployed on Vercel for live interaction.
 
 ---
 
-## Key Engineering Challenges Solved
-
-Stable TransformControls integration without object reset  
-Synchronizing 3D object transforms with global state  
-Dynamic texture loading and switching  
-Efficient rendering using memoization  
-Separation of scene logic and editor state  
-
----
-
-## Running Locally
-- npm install
-- npm run dev
-
----
-
-## Future Improvements
-
-Object snapping  
-Grid system  
-Collision detection  
-Save / load scenes  
-Undo / redo system  
+This project demonstrates real-time spatial interaction, state-driven rendering, and modern frontend architecture.
