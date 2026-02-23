@@ -1,73 +1,91 @@
-# React + TypeScript + Vite
+# Spatial Room Editor (React Three Fiber)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interactive web-based 3D room editor built with React Three Fiber, TypeScript, and Zustand.  
+Supports real-time object placement, selection, transformation, and configurable lighting and materials.
 
-Currently, two official plugins are available:
+Live Demo: https://your-link-here.vercel.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+• Interactive 3D room environment  
+• Add, select, and manipulate objects (move, rotate, scale)  
+• TransformControls integration with stable object state synchronization  
+• Camera orbit system with constrained navigation  
+• Physically-based lighting with adjustable intensity and temperature  
+• Real-time texture switching (wood floor presets)  
+• GLTF model loading pipeline  
+• Modular architecture with Zustand global state management  
+• Responsive UI with real-time scene updates  
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Frontend  
+• React  
+• TypeScript  
+• React Three Fiber  
+• Three.js  
+• Zustand  
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3D / Graphics  
+• GLTF models  
+• PBR materials  
+• TransformControls  
+• OrbitControls  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Tooling  
+• Vite  
+• ES Modules  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Architecture Overview
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The editor separates responsibilities into independent layers:
+
+• Scene Layer  
+Handles rendering, camera, lighting, and environment
+
+• Object Layer  
+Each object is represented as a stable THREE.Group  
+TransformControls attaches dynamically to selected object
+
+• State Layer (Zustand)  
+Manages
+
+- scene settings
+- lighting
+- object transforms
+- selection state
+
+• UI Layer  
+Settings panel and editor controls update state, which synchronizes with the 3D scene
+
+---
+
+## Key Engineering Challenges Solved
+
+Stable TransformControls integration without object reset  
+Synchronizing 3D object transforms with global state  
+Dynamic texture loading and switching  
+Efficient rendering using memoization  
+Separation of scene logic and editor state  
+
+---
+
+## Running Locally
+npm install
+npm run dev
+
+---
+
+## Future Improvements
+
+Object snapping  
+Grid system  
+Collision detection  
+Save / load scenes  
+Undo / redo system  
