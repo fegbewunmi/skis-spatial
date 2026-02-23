@@ -181,6 +181,7 @@ canvas {
   display: flex;
   gap: 8px;
   padding: 4px 0;
+  flex-wrap: wrap
 }
 
 .swatch {

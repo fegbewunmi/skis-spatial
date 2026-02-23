@@ -3,15 +3,27 @@ import { useStudioStore } from "../store/useStudioStore";
 import { ObjectPanel } from "./ObjectPanel";
 
 const WALL_SWATCHES = [
-  "#f3f0e9",
-  "#e8dfd0",
-  "#d8cdb8",
-  "#cbbba3",
-  "#c2d4f5",
-  "#d9c2f5",
-  "#c2f5e6",
-  "#f5c2d9",
-] as const;
+  "#f5f1e8", // warm white
+  "#e7dccb", // soft beige
+  "#cfc6b4", // greige
+  "#b8b1a1", // taupe
+  "#c6d2c3", // sage green
+  "#bcc9d6", // dusty blue
+  "#d6c2cc", // muted blush
+  "#c9b49c", // warm clay
+];
+
+const FLOOR_SWATCHES = [
+  "#d9cbb6", // light oak
+  "#c8b79f", // natural oak
+  "#b49a7a", // warm honey
+  "#9c856c", // walnut light
+
+  "#7c6a58", // walnut dark
+  "#6b5a4b", // espresso
+  "#bfc2c7", // light concrete
+  "#9ea3a8", // darker concrete
+];
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -30,25 +42,29 @@ export function kelvinToCSS(k: number) {
 export function SettingsPanel() {
   const mode = useStudioStore((s) => s.mode);
   const wallColor = useStudioStore((s) => s.wallColor);
+  const floorColor = useStudioStore((s) => s.floorColor);
   const lightIntensity = useStudioStore((s) => s.lightIntensity);
   const lightTemp = useStudioStore((s) => s.lightTemp);
 
   const setMode = useStudioStore((s) => s.setMode);
   const setWallColor = useStudioStore((s) => s.setWallColor);
+  const setFloorColor = useStudioStore((s) => s.setFloorColor);
   const setLightIntensity = useStudioStore((s) => s.setLightIntensity);
   const setLightTemp = useStudioStore((s) => s.setLightTemp);
 
   const lightColor = useMemo(() => kelvinToCSS(lightTemp), [lightTemp]);
 
+  const floorPreset = useStudioStore((s) => s.floorPreset);
+  const setFloorPreset = useStudioStore((s) => s.setFloorPreset);
+
   return (
     <div className="settings-panel">
       <div className="settings-header">
         <div className="panel-title">Design Settings</div>
-        {/* optional close button for later */}
+        {/* close button for later */}
         {/* <button className="icon-btn" aria-label="Close">×</button> */}
       </div>
-
-      {/* Day/Night segmented */}
+      {/* Day/Night */}
       <div className="mode-tabs">
         <button
           className={mode === "day" ? "tab active" : "tab"}
@@ -65,7 +81,6 @@ export function SettingsPanel() {
           Night Mode
         </button>
       </div>
-
       {/* Wall swatches */}
       <div className="section">
         <div className="label">Wall Color</div>
@@ -85,7 +100,43 @@ export function SettingsPanel() {
           })}
         </div>
       </div>
+      <div className="section">
+        <div className="label">Floor</div>
 
+        <div className="mode-tabs">
+          <button
+            className={floorPreset === "brown" ? "tab active" : "tab"}
+            onClick={() => setFloorPreset("brown")}
+            type="button"
+          >
+            Brown Wood
+          </button>
+
+          <button
+            className={floorPreset === "grey" ? "tab active" : "tab"}
+            onClick={() => setFloorPreset("grey")}
+            type="button"
+          >
+            Grey Wood
+          </button>
+        </div>
+      </div>
+      {/* ;Floor Color
+      <div className="section">
+        <div className="label">Floor Color</div>
+        <div className="swatches">
+          {FLOOR_SWATCHES.map((c) => (
+            <button
+              key={c}
+              className={floorColor === c ? "swatch active" : "swatch"}
+              style={{ background: c }}
+              onClick={() => setFloorColor(c)}
+              aria-label={`Floor color ${c}`}
+              type="button"
+            />
+          ))}
+        </div>
+      </div> */}
       {/* Light intensity */}
       <div className="section">
         <div className="label">Light Intensity</div>
@@ -99,7 +150,6 @@ export function SettingsPanel() {
           onChange={(e) => setLightIntensity(parseFloat(e.target.value))}
         />
       </div>
-
       {/* Light temperature */}
       <div className="section">
         <div className="label">Light Temperature</div>
@@ -118,7 +168,6 @@ export function SettingsPanel() {
           <span className="kelvin-text">{Math.round(lightTemp)}K</span>
         </div>
       </div>
-
       {/* Selected object section */}
       <ObjectPanel />
     </div>

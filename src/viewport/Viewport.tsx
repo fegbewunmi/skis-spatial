@@ -1,31 +1,90 @@
 import { Canvas } from "@react-three/fiber";
+import {
+  OrbitControls,
+  TransformControls,
+  useTexture,
+} from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+
 import { useStudioStore } from "../store/useStudioStore";
 import { useEditorStore } from "../store/editorStore";
 import { kelvinToCSS } from "../ui/SettingsPanel";
-import { OrbitControls, TransformControls } from "@react-three/drei";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 
-function Room({ wallColor }: { wallColor: string }) {
-  const W = 8; // room width
-  const D = 10; // room depth
-  const H = 4; // wall height
+function Room({
+  wallColor,
+  floorColor,
+}: {
+  wallColor: string;
+  floorColor: string;
+}) {
+  const W = 8;
+  const D = 10;
+  const H = 4;
 
-  const floorColor = "#b9b0a3";
+  const floorPreset = useStudioStore((s) => s.floorPreset); // "brown" | "grey"
+
+  // Memoize URLs so useTexture doesn't get a new object every render
+  const urls = useMemo(() => {
+    return floorPreset === "grey"
+      ? {
+          map: "/textures/floor_grey/color.jpg",
+          normalMap: "/textures/floor_grey/normal.jpg",
+          roughnessMap: "/textures/floor_grey/roughness.jpg",
+        }
+      : {
+          map: "/textures/floor_brown/color.jpg",
+          normalMap: "/textures/floor_brown/normal.jpg",
+          roughnessMap: "/textures/floor_brown/roughness.jpg",
+        };
+  }, [floorPreset]);
+
+  const { map, normalMap, roughnessMap } = useTexture(urls);
+
+  // Make the texture read like planks: repeat + wrap + colorSpace
+  useMemo(() => {
+    const texs = [map, normalMap, roughnessMap].filter(
+      Boolean,
+    ) as THREE.Texture[];
+    texs.forEach((t) => {
+      t.wrapS = THREE.RepeatWrapping;
+      t.wrapT = THREE.RepeatWrapping;
+
+      // tweak these for your room scale
+      t.repeat.set(2.2, 2.2);
+
+      t.anisotropy = 8;
+      t.needsUpdate = true;
+    });
+
+    if (map) (map as any).colorSpace = THREE.SRGBColorSpace;
+  }, [map, normalMap, roughnessMap]);
 
   return (
     <group>
       {/* floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[W, D]} />
-        <meshStandardMaterial color={floorColor} roughness={0.95} />
+        <meshStandardMaterial
+          key={floorPreset} // force refresh when preset changes
+          map={map}
+          normalMap={normalMap}
+          roughnessMap={roughnessMap}
+          roughness={1}
+          // tint the texture so you can push it warmer/cooler from settings
+          color={floorColor}
+        />
       </mesh>
 
       {/* back wall */}
       <mesh position={[0, H / 2, -D / 2]} receiveShadow>
         <planeGeometry args={[W, H]} />
-        <meshStandardMaterial color={wallColor} side={2} roughness={0.9} />
+        <meshStandardMaterial
+          color={wallColor}
+          side={THREE.DoubleSide}
+          roughness={0.9}
+        />
       </mesh>
 
       {/* left wall */}
@@ -35,13 +94,17 @@ function Room({ wallColor }: { wallColor: string }) {
         receiveShadow
       >
         <planeGeometry args={[D, H]} />
-        <meshStandardMaterial color={wallColor} side={2} roughness={0.9} />
+        <meshStandardMaterial
+          color={wallColor}
+          side={THREE.DoubleSide}
+          roughness={0.9}
+        />
       </mesh>
 
-      {/* baseboard-ish line (subtle) */}
+      {/* baseboard-ish line */}
       <mesh position={[0, 0.02, -D / 2 + 0.01]}>
         <planeGeometry args={[W, 0.06]} />
-        <meshStandardMaterial color="rgba(0,0,0,0.15)" transparent />
+        <meshStandardMaterial color="#000000" transparent opacity={0.15} />
       </mesh>
     </group>
   );
@@ -51,6 +114,7 @@ export function Viewport() {
   // Studio settings
   const mode = useStudioStore((s) => s.mode);
   const wallColor = useStudioStore((s) => s.wallColor);
+  const floorColor = useStudioStore((s) => s.floorColor);
   const lightIntensity = useStudioStore((s) => s.lightIntensity);
   const lightTemp = useStudioStore((s) => s.lightTemp);
   const lightColor = useMemo(() => kelvinToCSS(lightTemp), [lightTemp]);
@@ -62,10 +126,7 @@ export function Viewport() {
   const toolMode = useEditorStore((s) => s.toolMode);
   const updateObject = useEditorStore((s) => s.updateObject);
 
-  // controls refs
   const orbitRef = useRef<OrbitControlsImpl>(null);
-
-  // keep refs to every object group
   const objectRefs = useRef<Record<string, THREE.Group | null>>({});
 
   const selectedObj3D = selectedId ? objectRefs.current[selectedId] : null;
@@ -78,26 +139,13 @@ export function Viewport() {
         <Canvas
           shadows
           dpr={[1, 2]}
-          camera={{
-            position: [4.5, 2.2, 4.5],
-            fov: 42,
-            near: 0.1,
-            far: 100,
-          }}
+          camera={{ position: [4.5, 2.2, 4.5], fov: 42, near: 0.1, far: 100 }}
           onPointerMissed={() => selectObject(null)}
         >
           <color
             attach="background"
             args={[mode === "day" ? "#111111" : "#0b0b0c"]}
           />
-
-          {/* <directionalLight
-            position={[5, 8, 5]}
-            intensity={lightIntensity}
-            color={lightColor}
-            castShadow
-          />
-          <ambientLight intensity={mode === "day" ? 0.35 : 0.15} /> */}
 
           <ambientLight intensity={mode === "day" ? 0.45 : 0.2} />
 
@@ -119,50 +167,39 @@ export function Viewport() {
           <hemisphereLight
             intensity={mode === "day" ? 0.35 : 0.2}
             color={lightColor}
-            groundColor={"#1b1b1b"}
+            groundColor="#1b1b1b"
           />
-          <Room wallColor={wallColor} />
 
-          {/* ✅ render objects as stable groups (no TransformControls wrapping) */}
-          {objects.map((obj) => {
-            const isSelected = selectedId === obj.id;
+          <Room wallColor={wallColor} floorColor={floorColor} />
 
-            return (
-              <group
-                key={obj.id}
-                ref={(node) => {
-                  objectRefs.current[obj.id] = node;
-                }}
-                position={obj.position}
-                rotation={obj.rotation}
-                scale={obj.scale}
-                onPointerDown={(e) => {
-                  e.stopPropagation();
-                  selectObject(obj.id);
-                }}
-              >
-                <mesh castShadow>
-                  <boxGeometry args={obj.size} />
-                  <meshStandardMaterial
-                    color="#bdbdbd"
-                    roughness={0.95}
-                    metalness={0}
-                  />
-                  {/* <meshStandardMaterial
-                    color={isSelected ? "#00e5ff" : obj.color}
-                    roughness={0.7}
-                    metalness={0}
-                  /> */}
-                </mesh>
-              </group>
-            );
-          })}
+          {objects.map((obj) => (
+            <group
+              key={obj.id}
+              ref={(node) => {
+                objectRefs.current[obj.id] = node;
+              }}
+              position={obj.position}
+              rotation={obj.rotation}
+              scale={obj.scale}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                selectObject(obj.id);
+              }}
+            >
+              <mesh castShadow>
+                <boxGeometry args={obj.size} />
+                <meshStandardMaterial
+                  color="#bdbdbd"
+                  roughness={0.95}
+                  metalness={0}
+                />
+              </mesh>
+            </group>
+          ))}
 
-          {/* ✅ ONE TransformControls that attaches to selected object */}
           <TransformControls
             enabled={tcEnabled}
             mode={tcMode}
-            // this is the key part: attach to the real selected THREE.Group
             object={selectedObj3D as unknown as THREE.Object3D}
             onMouseDown={() => {
               if (orbitRef.current) orbitRef.current.enabled = false;
