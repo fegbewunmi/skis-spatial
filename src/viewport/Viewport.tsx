@@ -11,6 +11,7 @@ import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { useStudioStore } from "../store/useStudioStore";
 import { useEditorStore } from "../store/editorStore";
 import { kelvinToCSS } from "../ui/SettingsPanel";
+import { Model } from "./Model";
 
 function Room({
   wallColor,
@@ -186,14 +187,7 @@ export function Viewport() {
                 selectObject(obj.id);
               }}
             >
-              <mesh castShadow>
-                <boxGeometry args={obj.size} />
-                <meshStandardMaterial
-                  color="#bdbdbd"
-                  roughness={0.95}
-                  metalness={0}
-                />
-              </mesh>
+              <Model type={obj.type as any} />
             </group>
           ))}
 
