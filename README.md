@@ -77,8 +77,8 @@ Separation of scene logic and editor state
 ---
 
 ## Running Locally
-npm install
-npm run dev
+- npm install
+- npm run dev
 
 ---
 
