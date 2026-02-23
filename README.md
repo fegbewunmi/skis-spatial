@@ -3,7 +3,7 @@
 Interactive web-based 3D room editor built with React Three Fiber, TypeScript, and Zustand.  
 Supports real-time object placement, selection, transformation, and configurable lighting and materials.
 
-Live Demo: https://your-link-here.vercel.app
+Live Demo: https://skis-spatial.vercel.app/
 
 ---
 
